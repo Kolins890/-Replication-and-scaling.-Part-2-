@@ -45,51 +45,68 @@ master-сервер и несколько slave-серверов;
 магазины (столбцы произвольно).
 Опишите принципы построения системы и их разграничение или разбивку между базами данных.
 
-ПРИЛОЖЕНИЕ (API)
-│
-├── Роутер запросов (Shard Router)
-
-│   ├── Вертикальное маршрутизирование (по домену: пользователи/книги/магазины)
-
-│   └── Горизонтальное маршрутизирование (по ключу шарда)
-│
-├── ДОМЕН «ПОЛЬЗОВАТЕЛИ»
-
-│   ├── Мастер-шарды
-
-│   │   ├── Шард 1 (Европа) → Master + 2 Slave
-
-│   │   ├── Шард 2 (Азия) → Master + 2 Slave  
-
-│   │   └── Шард 3 (Америка) → Master + 2 Slave
-
-│   └── Реплики для чтения (Slave)
+graph TD
+    A[Приложение (API)] --> B[Роутер запросов (Shard Router)]
 
 
+    B --> C[Домен «Пользователи»]
+    B --> D[Домен «Книги»]
+    B --> E[Домен «Магазины»]
 
-│
-├── ДОМЕН «КНИГИ»
+    subgraph C [Домен «Пользователи»]
+        C1[Шард 1 (Европа)] --> C1M[Master]
+        C1 --> C1S1[Slave 1]
+        C1 --> C1S2[Slave 2]
 
-│   ├── Мастер-шарды
+        C2[Шард 2 (Азия)] --> C2M[Master]
+        C2 --> C2S1[Slave 1]
+        C2 --> C2S2[Slave 2]
 
-│   │   ├── Шард 1 (Hash 0) → Master + 3 Slave
+        C3[Шард 3 (Америка)] --> C3M[Master]
+        C3 --> C3S1[Slave 1]
+        C3 --> C3S2[Slave 2]
+    end
 
-│   │   ├── Шард 2 (Hash 1) → Master + 3 Slave  
+    subgraph D [Домен «Книги»]
+        D1[Шард 1 (Hash 0)] --> D1M[Master]
+        D1 --> D1S1[Slave 1]
+        D1 --> D1S2[Slave 2]
+        D1 --> D1S3[Slave 3]
 
-│   │   └── Шард 3 (Hash 2) → Master + 3 Slave
+        D2[Шард 2 (Hash 1)] --> D2M[Master]
+        D2 --> D2S1[Slave 1]
+        D2 --> D2S2[Slave 2]
+        D2 --> D2S3[Slave 3]
 
-│   └── Реплики для чтения (Slave)
-│
-└── ДОМЕН «МАГАЗИНЫ»
-    ├── Мастер-шарды
-    
-    │   ├── Шард 1 (Москва) → Master + 1 Slave
-    
-    │   ├── Шард 2 (СПб) → Master + 1 Slave  
-    
-    │   └── Шард 3 (Регионы) → Master + 2 Slave
-    
-    └── Реплики для чтения (Slave)
+        D3[Шард 3 (Hash 2)] --> D3M[Master]
+        D3 --> D3S1[Slave 1]
+        D3 --> D3S2[Slave 2]
+        D3 --> D3S3[Slave 3]
+    end
+
+    subgraph E [Домен «Магазины»]
+        E1[Шард 1 (Москва)] --> E1M[Master]
+        E1 --> E1S1[Slave 1]
+
+        E2[Шард 2 (СПб)] --> E2M[Master]
+        E2 --> E2S1[Slave 1]
+
+        E3[Шард 3 (Регионы)] --> E3M[Master]
+        E3 --> E3S1[Slave 1]
+        E3 --> E3S2[Slave 2]
+    end
+
+    %% Стилизация
+    classDef master fill:#4CAF50,stroke:#388E3C,stroke-width:2px
+    classDef slave fill:#2196F3,stroke:#0D47A1,stroke-width:2px
+    classDef shard fill:#FFEB3B,stroke:#F57F17,stroke-width:1px
+    classDef router fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px
+
+    class C1,C2,C3,D1,D2,D3,E1,E2,E3 shard
+    class C1M,C2M,C3M,D1M,D2M,D3M,E1M,E2M,E3M master
+    class C1S1,C1S2,C2S1,C2S2,C3S1,C3S2,D1S1,D1S2,D1S3,D2S1,D2S2,D2S3,D3S1,D3S2,D3S3,E1S1,E2S1,E3S1,E3S2 slave
+    class B router
+
 
    Режимы работы серверов
 1. Мастер‑серверы (Master):
