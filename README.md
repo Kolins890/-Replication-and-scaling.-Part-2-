@@ -178,4 +178,5 @@ graph TD
 
 SQL скрипт с командами для базы данных.
 
+<img width="1366" height="1431" alt="image" src="https://github.com/user-attachments/assets/0a41c89c-ca08-4b0a-9467-2c543643038a" />
 
